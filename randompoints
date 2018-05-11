@@ -1,0 +1,38 @@
+#import counties 
+#attribute query to select one county boundary 
+#generate 500 points 
+#filter out in the extent of the boundary those that fall otuside the boundary 
+
+library(rgdal)
+
+ca_dir <- "C:\\Users\\student\\Desktop\\rspatialdata-gh-pages\\exercises\\data"
+ogrListLayers(ca_dir)
+ca_counties <- readOGR(ca_dir, "ca_counties_census")
+
+SCC <- ca_counties[ca_counties$CountyNAME=="Santa Clara County", ]
+plot(SCC)
+
+str(SCC)
+#find the extent bounding box
+SCC@bbox
+x <- runif(min = SCC@bbox[1,1], 
+           max = SCC@bbox[1,2], 
+           500)
+y <- runif(min=SCC@bbox[2,1],
+           max= SCC@bbox[2,2],
+           500)
+
+#plot(x,y, add=TRUE)
+points (x=x, y=y, pch=16)
+head(ca_counties@data)
+
+pts_sp <- SpatialPoints(data.frame(x,y), proj4string = SCC@proj4string)
+
+#plot
+plot(SCC)
+plot (pts_sp, add=TRUE)
+
+library(rgeos)
+Clipped_points <- gIntersection(pts_sp, SCC)
+
+plot(Clipped_points, add=TRUE)
