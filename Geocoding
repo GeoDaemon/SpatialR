@@ -1,0 +1,43 @@
+###################
+#### GEOCODING ####
+###################
+
+### Geocoding and Visualization with ggmap
+# 1. Import sf_libraries.csv from the data directory.
+
+sf_lib <- read.csv(url("https://raw.githubusercontent.com/ajlyons/rspatialdata/gh-pages/exercises/data/sf_libraries.csv"), stringsAsFactors = FALSE)
+str(sf_lib)
+head(sf_lib)
+
+# 2. Concatenate the address columns into a single character vector. 
+
+sf_lib_address <- paste(sf_lib$Address, sf_lib$City, sf_lib$State)
+
+
+# 3. Geocode the addresses and add the latitude and longitude columns to the data
+#  frame.
+
+## Load my Google Maps API key
+
+
+## Enter API key
+
+sf_df <- ggmap::geocode(sf_lib_address, source = "google", output = "latlona")
+
+
+# 4. Create a SpatialPointsDataFrame for the county libraries. Plot them, and save
+#  as a RData file. 
+
+library(sp); library(raster)
+library(ggmap)
+
+bbox(sf_lib_sp)
+
+sf_map <- get_map(location = c(left = -122.49807, bottom = 37.71243, right = -122.39120, top = 37.80258))
+
+plot(sf_map)
+
+qmap(location = "San Francisco", source="google", messaging=FALSE)
+sf_lib_sp <- sp::SpatialPoints(sf_df[!is.na(sf_df$lon),c("lon","lat")], proj4string = CRS("+init=epsg:3857"))
+fortify(sf_lib_sp)
+plot(sf_lib_sp, pch=18, col="purple", cex=1.2, add=TRUE)
